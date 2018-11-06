@@ -44,6 +44,11 @@
                     <artifactId>exec-maven-plugin</artifactId>
                     <version>1.5.0</version>
                     <configuration>
+                        <!--
+                            Define "skip" as true, because the plugin requires the mainClass to be specified,
+                            but we don't want to run it in this directory, but in the "App" directory where the main
+                            application is held. 
+                        -->
                         <skip>true</skip>
                         <mainClass>fi.projects.fairline.app.App</mainClass>
                     </configuration>

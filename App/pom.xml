@@ -46,8 +46,11 @@
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>1.5.0</version>
                 <configuration>
-                    <mainClass>fi.projects.fairline.app.App</mainClass>
+                    <!--
+                        Define "skip" as false, because we defined it to be "true" in the parent.
+                    -->
                     <skip>false</skip>
+                    <mainClass>fi.projects.fairline.app.App</mainClass>
                 </configuration>
             </plugin>
         </plugins>
