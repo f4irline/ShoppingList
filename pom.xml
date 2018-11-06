@@ -50,7 +50,7 @@
                             application is held. 
                         -->
                         <skip>true</skip>
-                        <mainClass>fi.projects.fairline.app.App</mainClass>
+                        <mainClass>none</mainClass>
                     </configuration>
                 </plugin>
             </plugins>
