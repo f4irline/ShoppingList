@@ -14,17 +14,23 @@ public class EzParser {
     }
 
     private void createJSONFile() {
-        try {
-            jsonFile = new File("EzParser/src/resources/data.json");
-            jsonFile.createNewFile();
+        if (new File("EzParser/src/resources/data.json").isFile()) {
+            System.out.println("File already exists. Using the existing file.");
+        } else {
+            try {
+                jsonFile = new File("EzParser/src/resources/data.json");
+                jsonFile.createNewFile();
 
-            jsonWriter = new FileWriter(jsonFile);
-            jsonWriter.write("Test");
-            jsonWriter.flush();
+                System.out.println("File created.");
     
-            jsonWriter.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+                jsonWriter = new FileWriter(jsonFile);
+                jsonWriter.write("Test");
+                jsonWriter.flush();
+        
+                jsonWriter.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 }
