@@ -1,8 +1,6 @@
 package fi.projects.fairline.ezparser;
 import java.io.File;
 import java.io.FileWriter;
-import java.util.List;
-import java.util.ArrayList;
 import java.io.IOException;
 import java.lang.reflect.*;
 
@@ -19,57 +17,71 @@ public class EzParser {
     private void createJSONFile() {
         if (new File("EzParser/src/resources/data.json").isFile()) {
             System.out.println("File already exists. Using the existing file.");
+            initJSONWriter();
         } else {
             try {
                 jsonFile = new File("EzParser/src/resources/data.json");
                 jsonFile.createNewFile();
 
+                initJSONWriter();
+
+                initJSON();
+
                 System.out.println("File created.");
-            
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
     }
 
-    @SuppressWarnings("unchecked")
-    public void write (Object obj) {
-        Class<?> c = obj.getClass();
-        List<String> items = new ArrayList<>();
-        String className = "";
-        String listName = "";
+    private void initJSONWriter() {
+        try {
+            jsonWriter = new FileWriter("EzParser/src/resources/data.json", true);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
+    private void initJSON() {
+        StringBuilder jsonInit = new StringBuilder();
+        jsonInit.append("{");
+        jsonInit.append("\n\n");
+        jsonInit.append("}");
+        
+        try {
+            jsonWriter.write(jsonInit.toString());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        flushWriter();
+    }
+
+    public void write(Object obj) {
+        StringBuilder jsonString = new StringBuilder();
+        Class<?> c = obj.getClass();
+        jsonString.append("\"name\" : ");
         for (Field field : c.getDeclaredFields()) {
             try {
-                if (field.getName().equals("items")) {
-                    listName = field.getName();
-                    items = (List<String>) field.get(obj);
-                } else if (field.getName().equals("name")) {
-                    className = field.get(obj).toString();
-                }
-            } catch (IllegalAccessException e) {
+                jsonString.append("\""+field.getName()+"\"");
+                jsonWriter.write(jsonString.toString());
+                System.out.println("\""+field.getName() + "\": \"" +  field.get(obj).toString() + "\"");
+            } catch (IllegalAccessException | IOException e) {
                 e.printStackTrace();
             }
         }
-
-        System.out.println(className);
-
-        System.out.println(listName);
-
-        for (String item : items) {
-            System.out.println(item);   
-        }
-
-        writeToJSON(className, listName, items);
     }
 
-    public void writeToJSON(String className, String listName, List<String> items) {
-        String toWrite = "Terse";
-
+    private void flushWriter() {
         try {
-            jsonWriter = new FileWriter(jsonFile);
-            jsonWriter.write(toWrite);
             jsonWriter.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void closeWriter() {
+        try {
             jsonWriter.close();
         } catch (IOException e) {
             e.printStackTrace();
