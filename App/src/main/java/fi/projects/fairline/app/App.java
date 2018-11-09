@@ -5,5 +5,11 @@ public class App {
     public static void main(String[] args) {
         System.out.println("App started.");
         EzParser ezParser = new EzParser();
+        Category vegetables = new Category("Vegetables");
+
+        vegetables.addItem("Cucumber");
+        vegetables.addItem("Carrot");
+
+        ezParser.write(vegetables);
     }
 }

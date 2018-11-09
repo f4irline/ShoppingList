@@ -1,7 +1,10 @@
 package fi.projects.fairline.ezparser;
 import java.io.File;
 import java.io.FileWriter;
+import java.util.List;
+import java.util.ArrayList;
 import java.io.IOException;
+import java.lang.reflect.*;
 
 public class EzParser {
 
@@ -22,15 +25,54 @@ public class EzParser {
                 jsonFile.createNewFile();
 
                 System.out.println("File created.");
-    
-                jsonWriter = new FileWriter(jsonFile);
-                jsonWriter.write("Test");
-                jsonWriter.flush();
-        
-                jsonWriter.close();
+            
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public void write (Object obj) {
+        Class<?> c = obj.getClass();
+        List<String> items = new ArrayList<>();
+        String className = "";
+        String listName = "";
+
+        for (Field field : c.getDeclaredFields()) {
+            try {
+                if (field.getName().equals("items")) {
+                    listName = field.getName();
+                    items = (List<String>) field.get(obj);
+                } else if (field.getName().equals("name")) {
+                    className = field.get(obj).toString();
+                }
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
+        }
+
+        System.out.println(className);
+
+        System.out.println(listName);
+
+        for (String item : items) {
+            System.out.println(item);   
+        }
+
+        writeToJSON(className, listName, items);
+    }
+
+    public void writeToJSON(String className, String listName, List<String> items) {
+        String toWrite = "Terse";
+
+        try {
+            jsonWriter = new FileWriter(jsonFile);
+            jsonWriter.write(toWrite);
+            jsonWriter.flush();
+            jsonWriter.close();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }
