@@ -133,7 +133,7 @@ public class EzParser {
                 startIndex = index;
             }
         }
-        testWrite(startIndex, lastIndex);
+        writeToFile(startIndex, lastIndex-1);
     }
 
     private void addItemToJSON(String item) {
@@ -154,7 +154,7 @@ public class EzParser {
         writeToFile(startIndex, addIndex);
     }
 
-    private void testWrite(int startIndex, int addIndex) {
+    private void writeToFile(int startIndex, int lastIndex) {
         int index = 0;
         jsonString = new StringBuilder();
         for (String line : lines) {
@@ -162,34 +162,7 @@ public class EzParser {
                 indentAmount -= 4;
             }
             indent();
-            if (index > startIndex-1 && index < addIndex-2) {
-                jsonString.append(line+",\n");
-            } else {
-                jsonString.append(line+"\n");
-            }
-            if (line.contains("{") || line.contains("[")) {
-                indentAmount += 4;
-            }
-            index++;
-        }
-        try {
-            jsonWriter = new FileWriter("data.json");
-            jsonWriter.write(jsonString.toString());
-            flushWriter();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void writeToFile(int startIndex, int addIndex) {
-        int index = 0;
-        jsonString = new StringBuilder();
-        for (String line : lines) {
-            if (line.contains("}") || line.contains("]")) {
-                indentAmount -= 4;
-            }
-            indent();
-            if (index > startIndex-1 && index < addIndex-1) {
+            if (index > startIndex-1 && index < lastIndex-1) {
                 jsonString.append(line+",\n");
             } else {
                 jsonString.append(line+"\n");
