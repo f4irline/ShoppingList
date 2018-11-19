@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.Iterator;
 
 public class EzParser {
 
@@ -77,43 +79,42 @@ public class EzParser {
     }
 
     public void write(String item) {
-        itemNumber++;
+        itemNumber = checkNextValidID();
         items.put(itemNumber, item);
         addItemToJSON(item);
     }
 
-    public void remove(String item) {
-        int key = getItemKey(item);
+    public void remove(int key) {
         items.remove(key);
-        removeItemFromJSON(item);
+        removeItemFromJSON(key);
     }
 
-    private int getItemKey(String item) {
-        int key = 0;
-        for(Map.Entry<Integer, String> entry : items.entrySet()) {
-            if (entry.getValue().equals(item)) {
-                key = entry.getKey();
+    private int checkNextValidID() {
+        int index = 101;
+        Set set = items.entrySet();
+        Iterator iterator = set.iterator();
+        while(iterator.hasNext()) {
+            Map.Entry mentry = (Map.Entry)iterator.next();
+            if (index != (int) mentry.getKey()) {
+                break;
             }
-        }
-        System.out.println(key);
-        return key;
+            index++;
+        } 
+        return index;
     }
 
     public HashMap<Integer, String> getItems() {
         return items;
     }
 
-    public List<String> getLines() {
-        return lines;
-    }
-
-    private void removeItemFromJSON(String item) {
+    private void removeItemFromJSON(int key) {
         int removeIndex = 0;
         int index = 0;
+        String keyString = Integer.toString(key);
 
         for (String line : lines) {
             index++;
-            if (line.contains(item)) {
+            if (line.contains(keyString)) {
                 removeIndex = index;
             }
         }
@@ -159,7 +160,9 @@ public class EzParser {
         jsonString = new StringBuilder();
         for (String line : lines) {
             if (line.contains("}") || line.contains("]")) {
-                indentAmount -= 4;
+                if (!line.contains("{") && !line.contains("[")) {
+                    indentAmount -= 4;
+                }
             }
             indent();
             if (index > startIndex-1 && index < lastIndex-1) {
@@ -168,7 +171,9 @@ public class EzParser {
                 jsonString.append(line+"\n");
             }
             if (line.contains("{") || line.contains("[")) {
-                indentAmount += 4;
+                if (!line.contains("}") && !line.contains("]")) {
+                    indentAmount += 4;
+                }
             }
             index++;
         }
