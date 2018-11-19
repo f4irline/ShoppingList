@@ -11,7 +11,6 @@ import java.util.Set;
 public class App {
     public static void main(String[] args) {
         Scanner input = new Scanner(System.in);
-        String userInput = "";
         boolean running = true;
         System.out.println("App started.");
         EzParser ezParser = new EzParser();
@@ -20,20 +19,25 @@ public class App {
 
         while (running) {
             System.out.println("What would you like to do? ('Add' item, 'Remove' item, 'Check' Items): ");
+            String userInput = "";
             userInput = input.nextLine();
             if (userInput.equals("check")) {
                 printItems(items);
             } else if (userInput.equals("add")) {
                 System.out.println("What would you like to add?");
-                userInput = input.nextLine();
-                ezParser.write(userInput);
+                String addInput = "";
+                addInput = input.nextLine();
+                ezParser.write(addInput);
                 items = ezParser.getItems();
             } else if (userInput.equals("remove")) {
-                System.out.println("What would you like to remove?");
-                userInput = input.nextLine();
-                ezParser.remove(userInput);
+                int keyInput = 0;
+                System.out.println("Enter key for removal");
+                printItems(items);
+                keyInput = input.nextInt();
+                ezParser.remove(keyInput);
                 items = ezParser.getItems();
             }
+            items = ezParser.getItems();
         }
         input.close();
     }
