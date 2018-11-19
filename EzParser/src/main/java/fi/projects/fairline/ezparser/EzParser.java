@@ -7,13 +7,16 @@ import java.io.IOException;
 import java.lang.reflect.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 public class EzParser {
 
     private File jsonFile;
     private FileWriter jsonWriter;
     private List<String> lines;
-    private List<String> items = new ArrayList<>();
+    private HashMap<Integer, String> items = new HashMap<>();
+    private int itemNumber = 100;
     private int indentAmount = 0;
     private StringBuilder jsonString;
 
@@ -27,7 +30,7 @@ public class EzParser {
             new File("data.json").length() != 0) {
             System.out.println("File already exists. Using the existing file.");
             initJSONWriter();
-            readFileToArray(false);
+            readFileToArray();
         } else {
             try {
                 jsonFile = new File("data.json");
@@ -36,6 +39,8 @@ public class EzParser {
                 initJSONWriter();
 
                 initJSON();
+
+                readFileToArray();
 
                 System.out.println("File initialized.");
             } catch (IOException e) {
@@ -72,18 +77,67 @@ public class EzParser {
     }
 
     public void write(String item) {
-        readFileToArray(false);
-        items.add(item);
+        itemNumber++;
+        items.put(itemNumber, item);
         addItemToJSON(item);
     }
 
     public void remove(String item) {
-        readFileToArray(true);
-        items.remove(item);
+        int key = getItemKey(item);
+        items.remove(key);
+        removeItemFromJSON(item);
+    }
+
+    private int getItemKey(String item) {
+        int key = 0;
+        for(Map.Entry<Integer, String> entry : items.entrySet()) {
+            if (entry.getValue().equals(item)) {
+                key = entry.getKey();
+            }
+        }
+        System.out.println(key);
+        return key;
+    }
+
+    public HashMap<Integer, String> getItems() {
+        return items;
+    }
+
+    public List<String> getLines() {
+        return lines;
+    }
+
+    private void removeItemFromJSON(String item) {
+        int removeIndex = 0;
+        int index = 0;
+
+        for (String line : lines) {
+            index++;
+            if (line.contains(item)) {
+                removeIndex = index;
+            }
+        }
+
+        lines.remove(removeIndex-1);
+
+        int startIndex = 0;
+        int lastIndex = 0;
+        index = 0;
+
+        for (String line : lines) {
+            index++;
+            if (line.contains("]")) {
+                lastIndex = index;
+                break;
+            } else if (line.contains("[")) {
+                startIndex = index;
+            }
+        }
+        testWrite(startIndex, lastIndex);
     }
 
     private void addItemToJSON(String item) {
-        item = "\""+item+"\"";
+        item = "{ \""+itemNumber+"\" : \""+item+"\" }";
         int startIndex = 0;
         int addIndex = 0;
         int index = 0;
@@ -98,6 +152,33 @@ public class EzParser {
         }
         lines.add(addIndex-1, item);
         writeToFile(startIndex, addIndex);
+    }
+
+    private void testWrite(int startIndex, int addIndex) {
+        int index = 0;
+        jsonString = new StringBuilder();
+        for (String line : lines) {
+            if (line.contains("}") || line.contains("]")) {
+                indentAmount -= 4;
+            }
+            indent();
+            if (index > startIndex-1 && index < addIndex-2) {
+                jsonString.append(line+",\n");
+            } else {
+                jsonString.append(line+"\n");
+            }
+            if (line.contains("{") || line.contains("[")) {
+                indentAmount += 4;
+            }
+            index++;
+        }
+        try {
+            jsonWriter = new FileWriter("data.json");
+            jsonWriter.write(jsonString.toString());
+            flushWriter();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void writeToFile(int startIndex, int addIndex) {
@@ -127,14 +208,8 @@ public class EzParser {
         }
     }
 
-    public List<String> getItems() {
-        return items;
-    }
-
-    private void readFileToArray(boolean removing) {
+    private void readFileToArray() {
         lines = new ArrayList<String>();
-        items = new ArrayList<String>();
-        int itemArrayIndex = 0;
         boolean nextIsArray = false;
         String indent = "    ";
         try (BufferedReader fileReader = new BufferedReader(new FileReader("data.json"))) {
@@ -145,8 +220,13 @@ public class EzParser {
                 line = line.replaceAll(",", "");
                 lines.add(line);
                 if (nextIsArray && !line.contains("]")) {
+                    itemNumber++;
                     line = line.replaceAll("\"", "");
-                    items.add(line);
+                    line = line.replaceAll(" ", "");
+                    int key = Integer.parseInt(line.substring(1, 4));
+                    String value = line.substring(5);
+                    value = value.replaceAll("}", "");
+                    items.put(key, value);
                 } else if (line.contains("[")) {
                     nextIsArray = true;
                 } else if (line.contains("]")) {
@@ -157,20 +237,6 @@ public class EzParser {
             e.printStackTrace();
         }
     }
-
-    // private void readFileToArray() {
-    //     lines = new ArrayList<String>();
-    //     try (BufferedReader fileReader = new BufferedReader(new FileReader("EzParser/src/resources/data.json"))) {
-    //         String line;
-
-    //         while ((line = fileReader.readLine()) != null) {
-    //             line = line.replaceAll("\\s+", "");
-    //             lines.add(line);
-    //         }
-    //     } catch (IOException e) {
-    //         e.printStackTrace();
-    //     }    
-    // }
 
     private void indent() {
         for (int i = 0; i < indentAmount; i++) {

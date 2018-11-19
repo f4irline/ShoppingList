@@ -3,6 +3,10 @@ import fi.projects.fairline.ezparser.EzParser;
 
 import java.util.List;
 import java.util.Scanner;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Iterator;
+import java.util.Set;
 
 public class App {
     public static void main(String[] args) {
@@ -11,7 +15,8 @@ public class App {
         boolean running = true;
         System.out.println("App started.");
         EzParser ezParser = new EzParser();
-        List<String> items = ezParser.getItems();
+
+        HashMap<Integer, String> items = ezParser.getItems();
 
         while (running) {
             System.out.println("What would you like to do? ('Add' item, 'Remove' item, 'Check' Items): ");
@@ -33,10 +38,19 @@ public class App {
         input.close();
     }
 
-    public static void printItems(List<String> items) {
-        System.out.println("Current items: ");
-        for (String item : items) {
-            System.out.println(item);
+    public static void printItems(HashMap<Integer, String> items) {
+        Set set = items.entrySet();
+        Iterator iterator = set.iterator();
+        while(iterator.hasNext()) {
+            Map.Entry mentry = (Map.Entry)iterator.next();
+            System.out.print("key is: "+ mentry.getKey() + " & Value is: ");
+            System.out.println(mentry.getValue());
+        } 
+    }
+
+    public static void printLines(List<String> lines) {
+        for (String line : lines) {
+            System.out.println(line);
         }
     }
 }
