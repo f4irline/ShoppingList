@@ -32,11 +32,12 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
-                <version>3.0.2</version>
+                <version>3.1.0</version>
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>fi.projects.fairline.app.App</mainClass>
+                            <addClasspath>true</addClasspath>
+                            <mainClass>fi.projects.fairline.app.Gui</mainClass>
                         </manifest>
                     </archive>
                     <outputDirectory>../bin/</outputDirectory>
@@ -51,7 +52,7 @@
                         Define "skip" as false, because we defined it to be "true" in the parent.
                     -->
                     <skip>false</skip>
-                    <mainClass>fi.projects.fairline.app.App</mainClass>
+                    <mainClass>fi.projects.fairline.app.Gui</mainClass>
                 </configuration>
             </plugin>
         </plugins>
