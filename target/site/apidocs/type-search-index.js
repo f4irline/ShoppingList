@@ -1,1 +1,0 @@
-typeSearchIndex = [{"l":"All Classes","url":"allclasses-index.html"},{"p":"fi.projects.fairline.ezparser","l":"EzParser"},{"p":"fi.projects.fairline.app","l":"Gui"}]

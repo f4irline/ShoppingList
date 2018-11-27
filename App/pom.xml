@@ -37,7 +37,7 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass>fi.projects.fairline.app.Gui</mainClass>
+                            <mainClass>fi.projects.fairline.app.App</mainClass>
                         </manifest>
                     </archive>
                     <outputDirectory>../bin/</outputDirectory>
@@ -52,7 +52,7 @@
                         Define "skip" as false, because we defined it to be "true" in the parent.
                     -->
                     <skip>false</skip>
-                    <mainClass>fi.projects.fairline.app.Gui</mainClass>
+                    <mainClass>fi.projects.fairline.app.App</mainClass>
                 </configuration>
             </plugin>
         </plugins>

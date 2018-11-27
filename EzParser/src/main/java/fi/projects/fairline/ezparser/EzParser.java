@@ -386,7 +386,7 @@ public class EzParser {
     /**
      * Closes the jsonWriter when called.
      */
-    private void closeWriter() {
+    public void closeWriter() {
         try {
             jsonWriter.close();
         } catch (IOException e) {
