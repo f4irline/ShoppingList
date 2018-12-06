@@ -69,6 +69,7 @@ public class Gui extends Application {
     @Override
     public void start(Stage stage) {
         stage.setTitle("Shopping List");
+
         root = new BorderPane();
         Scene shoppingList = new Scene(root, 432, 768);
         shoppingList.getStylesheets().add(getClass().getResource("/style.css").toExternalForm());
@@ -79,9 +80,13 @@ public class Gui extends Application {
         HBox controls = new HBox();
 
         Label itemLabel = new Label("Item: ");
+        itemLabel.getStyleClass().add("headerLabel");
         TextField item = new TextField();
+        item.setPrefWidth(120);
         Label amountLabel = new Label("Amount: ");
+        amountLabel.getStyleClass().add("headerLabel");
         TextField amount = new TextField();
+        amount.setPrefWidth(80);
         Button add = new Button("+");
         Separator separator = new Separator();
 
@@ -146,7 +151,9 @@ public class Gui extends Application {
             AnchorPane itemWrapper = new AnchorPane();
             Button removeButton = new Button("X");
             Label item = new Label(value);
+            item.getStyleClass().add("itemLabel");
             Label amount = new Label(itemAmount);
+            amount.getStyleClass().add("itemLabel");
             itemWrapper.getChildren().addAll(item, amount, removeButton);
             itemBox.getChildren().addAll(itemWrapper, new Separator());
 

@@ -1,11 +1,12 @@
 .headerLabel {
-    -fx-min-width: 65px;
-    -fx-min-height: 30px;
-    -fx-max-width: 65px;
-    -fx-max-height: 30px;
-    -fx-font-size: 15px;
-    -fx-text-fill: #ffffff;
-    -fx-padding: 5px;
-    -fx-border-insets: 5px;
-    -fx-background-insets: 5px;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+
+.itemLabel {
+    -fx-text-fill: white;
+}
+
+.root {
+    -fx-background-color: #383838;
 }
