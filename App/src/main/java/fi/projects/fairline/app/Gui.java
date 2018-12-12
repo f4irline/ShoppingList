@@ -6,6 +6,7 @@ package fi.projects.fairline.app;
 import fi.projects.fairline.ezparser.EzParser;
 import javafx.application.Application;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.control.MenuBar;
@@ -19,6 +20,8 @@ import javafx.scene.layout.AnchorPane;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.List;
+import javafx.event.EventHandler;
+import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
 
 /**
@@ -48,6 +51,7 @@ public class Gui extends Application {
     EzParser ezParser;
     BorderPane root;
     LinkedHashMap<Integer, List<String>> items;
+    DBConnector dbConnector;
     VBox itemBox;
 
     @Override
@@ -70,6 +74,8 @@ public class Gui extends Application {
     public void start(Stage stage) {
         stage.setTitle("Shopping List");
 
+        dbConnector = new DBConnector();
+
         root = new BorderPane();
         Scene shoppingList = new Scene(root, 432, 768);
         shoppingList.getStylesheets().add(getClass().getResource("/style.css").toExternalForm());
@@ -81,20 +87,20 @@ public class Gui extends Application {
 
         Label itemLabel = new Label("Item: ");
         itemLabel.getStyleClass().add("headerLabel");
-        TextField item = new TextField();
-        item.setPrefWidth(120);
+        TextField itemField = new TextField();
+        itemField.setPrefWidth(120);
         Label amountLabel = new Label("Amount: ");
         amountLabel.getStyleClass().add("headerLabel");
-        TextField amount = new TextField();
-        amount.setPrefWidth(80);
+        TextField amountField = new TextField();
+        amountField.setPrefWidth(80);
         Button add = new Button("+");
         Separator separator = new Separator();
 
-        controls.getChildren().addAll(itemLabel, item, amountLabel, amount, add);
+        controls.getChildren().addAll(itemLabel, itemField, amountLabel, amountField, add);
         HBox.setMargin(itemLabel, new Insets(10, 0, 10, 5));
-        HBox.setMargin(item, new Insets(7, 5, 10, 5));
+        HBox.setMargin(itemField, new Insets(7, 5, 10, 5));
         HBox.setMargin(amountLabel, new Insets(10, 0, 10, 0));
-        HBox.setMargin(amount, new Insets(7, 5, 10, 5));
+        HBox.setMargin(amountField, new Insets(7, 5, 10, 5));
         HBox.setMargin(add, new Insets(7, 0, 10, 0));
 
         VBox.setMargin(separator, new Insets(0, 0, 10, 0));
@@ -106,15 +112,26 @@ public class Gui extends Application {
         root.setTop(topGroup);
         root.setCenter(itemBox);
 
-        add.setOnAction((e) -> {
-            ezParser.write(item.getText(), amount.getText());
-            item.setText("");
-            amount.setText("");
-            generateItemList();
+        add.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent e) {
+                int id = ezParser.write(itemField.getText(), amountField.getText());
+                Item item = new Item(id, itemField.getText(), Integer.parseInt(amountField.getText()));
+                itemField.setText("");
+                amountField.setText("");
+                generateItemList();
+                dbConnector.saveItem(item);
+            }
         });
 
         stage.setScene(shoppingList);
         stage.show();
+
+        stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+            public void handle(WindowEvent we) {
+                dbConnector.closeFactory();
+            }
+        });
     }
 
     /**
@@ -163,6 +180,7 @@ public class Gui extends Application {
 
             removeButton.setOnAction((e) -> {
                 ezParser.remove(key);
+                dbConnector.removeItem(key);
                 generateItemList();
             });
         } 

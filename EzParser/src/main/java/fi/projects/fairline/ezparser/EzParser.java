@@ -113,13 +113,15 @@ public class EzParser {
      * @param item the item which will be added to the .json.
      * @param amount the amount of items which will be added to the .json. Can be empty (null).
      */
-    public void write(String item, String amount) {
+    public int write(String item, String amount) {
         if (amount.equals("")) {
             amount = null;
         }
-        JSONObject object = new JSONObject(checkNextValidID(), item, amount);
+        int id = checkNextValidID();
+        JSONObject object = new JSONObject(id, item, amount);
         items.put(object.getKey(), object.getList());
         jsonStringifier.addItemToJSON(object, jsonWriter);
+        return id;
     }
 
     /**

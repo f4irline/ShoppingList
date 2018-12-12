@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE hibernate-mapping PUBLIC 
+"-//Hibernate/Hibernate Mapping DTD//EN"
+"http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd"> 
+
+<hibernate-mapping>
+    <class name="fi.projects.fairline.app.Item" table="ITEMS">
+
+        <meta attribute = "class-description">
+            This class contains all shopping list items. 
+        </meta>
+
+        <id name="id" type ="int" column="id">
+            <generator class="assigned"></generator>
+        </id>
+
+        <property name="name" column="name" type="string"/>
+        <property name="amount" column="amount" type="int"/>
+    </class>
+</hibernate-mapping>
