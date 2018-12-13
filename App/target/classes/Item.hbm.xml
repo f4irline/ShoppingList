@@ -14,7 +14,7 @@
             <generator class="assigned"></generator>
         </id>
 
-        <property name="name" column="name" type="string"/>
+        <property name="item" column="item" type="string"/>
         <property name="amount" column="amount" type="int"/>
     </class>
 </hibernate-mapping>
