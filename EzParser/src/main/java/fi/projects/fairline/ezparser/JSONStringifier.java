@@ -9,6 +9,7 @@ import java.util.LinkedHashMap;
 import java.io.FileReader;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.lang.reflect.Field;
 
 /**
  * Handles and manages the ArrayList which is a representation of the
@@ -131,6 +132,56 @@ public class JSONStringifier {
         int[] listBoundaries = checkListBoundaries();
 
         jsonWriter.writeToJSON(lines, listBoundaries[0], listBoundaries[1]-2);
+    }
+
+    public void addObjectToJSON(Object obj, JSONWriter jsonWriter) {
+        Class cls = obj.getClass();
+
+        int[] listBoundaries = checkListBoundaries();
+
+        Field[] fields = cls.getDeclaredFields();
+
+        int objectStartIndex = listBoundaries[1] - 1;
+        int objectEndIndex = objectStartIndex + fields.length + 1;
+
+        int fieldIndex = 0;
+
+        lines.add(objectStartIndex, "{");
+
+        for(int i = objectStartIndex+1; i < objectEndIndex; i++) {
+            String fieldName = fields[fieldIndex].getName();
+            Field field = null;
+            Object value = null;
+            try {
+                field = cls.getDeclaredField(fieldName);
+                field.setAccessible(true);
+            } catch (NoSuchFieldException e) {
+                e.printStackTrace();
+            }
+
+            if (field != null) {
+                try {
+                    value = field.get(obj);
+                    if (value instanceof String) {
+                        value = (String) "\"" + value + "\"";
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            
+            if (i != objectEndIndex-1) {
+                lines.add(i, ("\""+fieldName+"\"" + " : " + value + ","));
+            } else {
+                lines.add(i, ("\""+fieldName+"\"" + " : " + value));
+            }
+
+            fieldIndex++;
+        }
+
+        lines.add(objectEndIndex, "}");
+
+        jsonWriter.writeToJSON(lines, listBoundaries[0], objectEndIndex);
     }
 
     /**

@@ -108,6 +108,17 @@ public class EzParser {
     }
 
     /**
+     * Writes any kind of object to the .json.
+     * 
+     * @param obj the object that will be written.
+     */
+    public int write(Object obj) {
+        int id = checkNextValidID();
+        jsonStringifier.addObjectToJSON(obj, jsonWriter);
+        return id;
+    }
+
+    /**
      * Writes an object with a key and two string variables, item's name and amount, to the .json.
      * 
      * @param item the item which will be added to the .json.
@@ -144,7 +155,7 @@ public class EzParser {
      * 
      * @return The index which is available.
      */
-    private int checkNextValidID() {
+    public int checkNextValidID() {
         int index = 101;
 
         while (true) {
