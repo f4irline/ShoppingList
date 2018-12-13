@@ -4,15 +4,15 @@ import javax.persistence.*;
 
 @Entity(name = "Item")
 public class Item {
-    private int id;
+    public int id;
     
-    private String name;
+    public String item;
 
-    private int amount;
+    public int amount;
 
-    public Item (int id, String name, int amount) {
+    public Item (int id, String item, int amount) {
         setId(id);
-        setName(name);
+        setItem(item);
         setAmount(amount);
     }
 
@@ -24,11 +24,11 @@ public class Item {
         return id;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setItem(String item) {
+        this.item = item;
     }
-    public String getName() {
-        return name;
+    public String getItem() {
+        return item;
     }
 
     public void setAmount(int amount) {
