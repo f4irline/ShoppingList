@@ -135,7 +135,7 @@ public class JSONStringifier {
     }
 
     public void addObjectToJSON(Object obj, JSONWriter jsonWriter) {
-        Class cls = obj.getClass();
+        Class<?> cls = obj.getClass();
 
         int[] listBoundaries = checkListBoundaries();
 
