@@ -1,12 +1,44 @@
 .headerLabel {
-    -fx-text-fill: white;
+    -fx-text-fill: #fff;
     -fx-font-weight: bold;
 }
 
 .itemLabel {
-    -fx-text-fill: white;
+    -fx-text-fill: #fff;
+}
+
+.separator *.line {
+    -fx-border-style: solid;
+    -fx-border-width: 0 0 2 0; /* its make really one-pixel-border */
+    -fx-border-color: #7f8c8d;
+}
+
+.itemSeparator *.line {
+    -fx-border-style: solid;
+    -fx-border-width: 0 0 1 0; /* its make really one-pixel-border */
+    -fx-border-color: #95a5a6;
 }
 
 .root {
-    -fx-background-color: #383838;
+    -fx-background-color: #34495e;
+}
+
+.menu-bar {
+    -fx-background-color: #2c3e50;
+}
+
+.menu-bar .label {
+    -fx-text-fill: #fff;
+}
+
+.menu-item {
+    -fx-background-color: #777;
+}
+
+.menu-item:focused .label {
+   -fx-text-fill: #aaa;
+}
+
+.context-menu {
+    -fx-background-color: #777;
 }
