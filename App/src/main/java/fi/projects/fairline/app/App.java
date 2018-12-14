@@ -36,6 +36,5 @@ public class App {
         System.out.println("Author: Tommi Lepola");
         
         Application.launch(Gui.class, args);
-
     }
 }

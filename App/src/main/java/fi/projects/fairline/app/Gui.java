@@ -14,6 +14,10 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.Label;
 import javafx.scene.control.Button;
 import javafx.scene.control.Separator;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.AnchorPane;
@@ -23,6 +27,7 @@ import java.util.List;
 import javafx.event.EventHandler;
 import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
+import javafx.application.Platform;
 
 /**
  * Graphical user interface implementation of the shopping list application.
@@ -57,6 +62,10 @@ public class Gui extends Application {
     @Override
     public void init() {
         ezParser = new EzParser();
+        dbConnector = new DBConnector();
+        if (ezParser.getItems().size() == 0) {
+            dbConnector.writeTableToJSON(ezParser);
+        }
     }
 
     /**
@@ -74,15 +83,81 @@ public class Gui extends Application {
     public void start(Stage stage) {
         stage.setTitle("Shopping List");
 
-        dbConnector = new DBConnector();
-
         root = new BorderPane();
         Scene shoppingList = new Scene(root, 432, 768);
         shoppingList.getStylesheets().add(getClass().getResource("/style.css").toExternalForm());
 
+        MenuBar menuBar = createMenuBar();
+
+        HBox controls = createControls();
+
+        VBox topGroup = createTopGroup(menuBar, controls);
+
+        generateItemList();
+
+        root.setTop(topGroup);
+        root.setCenter(itemBox);
+
+        stage.setScene(shoppingList);
+        stage.show();
+
+        stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+            public void handle(WindowEvent we) {
+                dbConnector.closeFactory();
+                Platform.exit();
+            }
+        });
+    }
+
+    private MenuBar createMenuBar() {
         MenuBar menuBar = new MenuBar();
 
+        Menu menuFile = createFileMenu();
+
+        Menu menuAbout = createAboutMenu();
+
+        menuBar.getMenus().addAll(menuFile, menuAbout);
+        return menuBar;
+    }
+
+    public Menu createFileMenu() {
+        Menu menuFile = new Menu("File");
+
+        MenuItem exit = new MenuItem("Exit");
+
+        exit.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent e) {
+                dbConnector.closeFactory();
+                Platform.exit();
+            }
+        });
+        
+        menuFile.getItems().addAll(exit);
+        return menuFile;
+    }
+
+    public Menu createAboutMenu() {
+        Menu menuAbout = new Menu("About");
+        MenuItem about = new MenuItem("About Lotto App");
+        menuAbout.getItems().addAll(about);
+        return menuAbout;
+    }
+
+    private VBox createTopGroup(MenuBar menuBar, HBox controls) {
         VBox topGroup = new VBox();
+
+        Separator separator = new Separator();
+        separator.getStyleClass().add("itemSeparator");
+
+        VBox.setMargin(separator, new Insets(0, 0, 10, 0));
+
+        topGroup.getChildren().addAll(menuBar, new Separator(), controls, separator);
+
+        return topGroup;
+    }
+
+    private HBox createControls() {
         HBox controls = new HBox();
 
         Label itemLabel = new Label("Item: ");
@@ -94,44 +169,46 @@ public class Gui extends Application {
         TextField amountField = new TextField();
         amountField.setPrefWidth(80);
         Button add = new Button("+");
-        Separator separator = new Separator();
 
-        controls.getChildren().addAll(itemLabel, itemField, amountLabel, amountField, add);
         HBox.setMargin(itemLabel, new Insets(10, 0, 10, 5));
         HBox.setMargin(itemField, new Insets(7, 5, 10, 5));
         HBox.setMargin(amountLabel, new Insets(10, 0, 10, 0));
         HBox.setMargin(amountField, new Insets(7, 5, 10, 5));
         HBox.setMargin(add, new Insets(7, 0, 10, 0));
 
-        VBox.setMargin(separator, new Insets(0, 0, 10, 0));
-
-        topGroup.getChildren().addAll(menuBar, controls, separator);
-
-        generateItemList();
-
-        root.setTop(topGroup);
-        root.setCenter(itemBox);
+        controls.getChildren().addAll(itemLabel, itemField, amountLabel, amountField, add);
 
         add.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent e) {
-                int id = ezParser.write(itemField.getText(), amountField.getText());
-                Item item = new Item(id, itemField.getText(), Integer.parseInt(amountField.getText()));
-                itemField.setText("");
-                amountField.setText("");
-                generateItemList();
-                dbConnector.saveItem(item);
+                if (validateAmountField(amountField.getText())) {
+                    int id = ezParser.write(itemField.getText(), amountField.getText());
+                    Item item = new Item(id, itemField.getText(), Integer.parseInt(amountField.getText()));
+                    itemField.setText("");
+                    amountField.setText("");
+                    generateItemList();
+                    dbConnector.saveItem(item);
+                } else if (amountField.getText().equals("")) {
+                    int id = ezParser.write(itemField.getText(), amountField.getText());
+                    Item item = new Item(id, itemField.getText());
+                    itemField.setText("");
+                    amountField.setText("");
+                    generateItemList();
+                    dbConnector.saveItem(item);
+                } else {
+                    Alert alert = new Alert(AlertType.WARNING);
+                    alert.setTitle("Wrong input!");
+                    alert.setHeaderText("Invalid amount value!");
+                    alert.setContentText("Please only give numeric values to amount, or leave it empty.");
+                    alert.showAndWait();
+                }
             }
         });
+        return controls;
+    }
 
-        stage.setScene(shoppingList);
-        stage.show();
-
-        stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
-            public void handle(WindowEvent we) {
-                dbConnector.closeFactory();
-            }
-        });
+    private boolean validateAmountField(String amount) { 
+        return amount.matches("\\d+(\\.\\d+)?");
     }
 
     /**
@@ -171,8 +248,10 @@ public class Gui extends Application {
             item.getStyleClass().add("itemLabel");
             Label amount = new Label(itemAmount);
             amount.getStyleClass().add("itemLabel");
+            Separator separator = new Separator();
+            separator.getStyleClass().add("itemSeparator");
             itemWrapper.getChildren().addAll(item, amount, removeButton);
-            itemBox.getChildren().addAll(itemWrapper, new Separator());
+            itemBox.getChildren().addAll(itemWrapper, separator);
 
             AnchorPane.setLeftAnchor(item, 5.0);
             AnchorPane.setLeftAnchor(amount, 216.0);

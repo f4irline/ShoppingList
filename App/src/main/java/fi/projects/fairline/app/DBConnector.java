@@ -1,8 +1,16 @@
 package fi.projects.fairline.app;
 
+import fi.projects.fairline.ezparser.EzParser;
+import java.util.List;
 import org.hibernate.*;
 import org.hibernate.cfg.*;
 import org.hibernate.query.Query;
+
+// CREATE TABLE ITEMS (
+//     id INT(11) NOT NULL PRIMARY KEY,
+//     item VARCHAR(255),
+//     amount INT(11)
+// );
 
 public class DBConnector {
     // Create configuration object
@@ -41,6 +49,17 @@ public class DBConnector {
 
         tx.commit();
         session.close();
+    }
+
+    @SuppressWarnings("unchecked")
+    public void writeTableToJSON(EzParser ezParser) {
+        Session session = factory.openSession();
+
+        List<Item> results = session.createQuery("FROM Item").list();
+
+        for (Item item : results) {
+            ezParser.write(item.getItem(), String.valueOf(item.getAmount()));
+        }
     }
 
     public void closeFactory() {
