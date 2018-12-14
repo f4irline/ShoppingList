@@ -111,6 +111,7 @@
                     -->
                     <skip>false</skip>
                     <mainClass>fi.projects.fairline.app.App</mainClass>
+                    <cleanupDaemonThreads>false</cleanupDaemonThreads>
                 </configuration>
             </plugin>
         </plugins>
