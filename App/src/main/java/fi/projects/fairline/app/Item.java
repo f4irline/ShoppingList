@@ -8,12 +8,21 @@ public class Item {
     
     public String item;
 
-    public int amount;
+    public Integer amount;
 
-    public Item (int id, String item, int amount) {
+    public Item () {
+        
+    }
+
+    public Item (int id, String item, Integer amount) {
         setId(id);
         setItem(item);
         setAmount(amount);
+    }
+
+    public Item (int id, String item) {
+        setId(id);
+        setItem(item);
     }
 
     public void setId(int id) {
@@ -31,11 +40,11 @@ public class Item {
         return item;
     }
 
-    public void setAmount(int amount) {
+    public void setAmount(Integer amount) {
         this.amount = amount;
     }
 
-    public int getAmount() {
+    public Integer getAmount() {
         return amount;
     } 
 
