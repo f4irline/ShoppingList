@@ -1,6 +1,10 @@
 # Compiled class file
 *.class
 
+# Target folders that come up after compiling
+EzParser/target/
+App/target/
+
 # Log file
 *.log
 
