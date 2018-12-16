@@ -18,6 +18,7 @@ public class DBConnector {
 
     // Create SessionFactory that can be used to open a session
     SessionFactory factory;
+    Session session;
 
     public DBConnector () {
         cfg = new Configuration();
@@ -28,10 +29,13 @@ public class DBConnector {
         cfg.addAnnotatedClass(Item.class);
 
         factory = cfg.buildSessionFactory();
+        session = factory.openSession();
     }
 
     public void saveItem(Item item) {
-        Session session = factory.openSession();
+        if (!session.isOpen()) {
+            session = factory.openSession();
+        }
         Transaction tx = session.beginTransaction();
 
         session.persist(item);
@@ -41,7 +45,9 @@ public class DBConnector {
 
     @SuppressWarnings("rawtypes")
     public void removeItem(int key) {
-        Session session = factory.openSession();
+        if (!session.isOpen()) {
+            session = factory.openSession();
+        }
         Transaction tx = session.beginTransaction();
         Query removeQuery = session.createQuery("DELETE FROM Item WHERE id = "+key);
 
@@ -53,7 +59,9 @@ public class DBConnector {
 
     @SuppressWarnings("unchecked")
     public void writeTableToJSON(EzParser ezParser) {
-        Session session = factory.openSession();
+        if (!session.isOpen()) {
+            session = factory.openSession();
+        }
 
         List<Item> results = session.createQuery("FROM Item").list();
 

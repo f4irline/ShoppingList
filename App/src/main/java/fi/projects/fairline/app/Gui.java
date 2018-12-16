@@ -10,12 +10,9 @@ import javafx.stage.WindowEvent;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.control.MenuBar;
-import javafx.scene.control.TextField;
 import javafx.scene.control.Label;
 import javafx.scene.control.Button;
 import javafx.scene.control.Separator;
-import javafx.scene.control.Menu;
-import javafx.scene.control.MenuItem;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.layout.VBox;
@@ -25,8 +22,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.List;
 import javafx.event.EventHandler;
-import javafx.event.ActionEvent;
-import javafx.geometry.Insets;
 import javafx.application.Platform;
 
 /**
@@ -53,19 +48,16 @@ import javafx.application.Platform;
  */
 public class Gui extends Application {
 
-    EzParser ezParser;
-    BorderPane root;
-    LinkedHashMap<Integer, List<String>> items;
-    DBConnector dbConnector;
-    VBox itemBox;
+    private EzParser ezParser;
+    private BorderPane root;
+    private LinkedHashMap<Integer, List<String>> items;
+    private DBConnector dbConnector;
+    private VBox itemBox;
 
     @Override
     public void init() {
         ezParser = new EzParser();
         dbConnector = new DBConnector();
-        if (ezParser.getItems().size() == 0) {
-            dbConnector.writeTableToJSON(ezParser);
-        }
     }
 
     /**
@@ -83,15 +75,18 @@ public class Gui extends Application {
     public void start(Stage stage) {
         stage.setTitle("Shopping List");
 
+        if (ezParser.getItems().size() == 0) {
+            dbConnector.writeTableToJSON(ezParser);
+        }
+
         root = new BorderPane();
         Scene shoppingList = new Scene(root, 432, 768);
         shoppingList.getStylesheets().add(getClass().getResource("/style.css").toExternalForm());
 
-        MenuBar menuBar = createMenuBar();
+        Controls controls = new Controls();
+        AppMenu appMenu = new AppMenu();
 
-        HBox controls = createControls();
-
-        VBox topGroup = createTopGroup(menuBar, controls);
+        VBox topGroup = createTopGroup(appMenu, controls);
 
         generateItemList();
 
@@ -107,108 +102,63 @@ public class Gui extends Application {
                 Platform.exit();
             }
         });
+
+        setListeners(appMenu, controls);
     }
 
-    private MenuBar createMenuBar() {
-        MenuBar menuBar = new MenuBar();
-
-        Menu menuFile = createFileMenu();
-
-        Menu menuAbout = createAboutMenu();
-
-        menuBar.getMenus().addAll(menuFile, menuAbout);
-        return menuBar;
-    }
-
-    public Menu createFileMenu() {
-        Menu menuFile = new Menu("File");
-
-        MenuItem exit = new MenuItem("Exit");
-
-        exit.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent e) {
-                dbConnector.closeFactory();
-                Platform.exit();
+    private void setListeners(AppMenu appMenu, Controls controls) {
+        controls.getAddButton().setOnAction((e) -> {
+            if (validateAmountField(controls.getAmountField().getText()) && !controls.getAmountField().getText().equals("")) {
+                addItem(controls.getItemField().getText(), controls.getAmountField().getText());
+                controls.getItemField().setText("");
+                controls.getAmountField().setText("");
+            } else if (controls.getAmountField().getText().equals("")) {
+                createNewAlert("Wrong input!", "No item!", "Please give an item to add to the list.");
+            } else {
+                createNewAlert("Wrong input!", "Invalid amount value!", "Please only give numeric values to amount, or leave it empty.");
             }
         });
-        
-        menuFile.getItems().addAll(exit);
-        return menuFile;
-    }
 
-    public Menu createAboutMenu() {
-        Menu menuAbout = new Menu("About");
-        MenuItem about = new MenuItem("About Lotto App");
-        menuAbout.getItems().addAll(about);
-        return menuAbout;
+        appMenu.getExitButton().setOnAction((e) -> {
+            dbConnector.closeFactory();
+            Platform.exit();
+        });
     }
 
     private VBox createTopGroup(MenuBar menuBar, HBox controls) {
         VBox topGroup = new VBox();
 
-        Separator separator = new Separator();
-        separator.getStyleClass().add("itemSeparator");
-
-        VBox.setMargin(separator, new Insets(0, 0, 10, 0));
-
-        topGroup.getChildren().addAll(menuBar, new Separator(), controls, separator);
+        topGroup.getChildren().addAll(menuBar, controls);
 
         return topGroup;
     }
 
-    private HBox createControls() {
-        HBox controls = new HBox();
-
-        Label itemLabel = new Label("Item: ");
-        itemLabel.getStyleClass().add("headerLabel");
-        TextField itemField = new TextField();
-        itemField.setPrefWidth(120);
-        Label amountLabel = new Label("Amount: ");
-        amountLabel.getStyleClass().add("headerLabel");
-        TextField amountField = new TextField();
-        amountField.setPrefWidth(80);
-        Button add = new Button("+");
-
-        HBox.setMargin(itemLabel, new Insets(10, 0, 10, 5));
-        HBox.setMargin(itemField, new Insets(7, 5, 10, 5));
-        HBox.setMargin(amountLabel, new Insets(10, 0, 10, 0));
-        HBox.setMargin(amountField, new Insets(7, 5, 10, 5));
-        HBox.setMargin(add, new Insets(7, 0, 10, 0));
-
-        controls.getChildren().addAll(itemLabel, itemField, amountLabel, amountField, add);
-
-        add.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent e) {
-                if (validateAmountField(amountField.getText())) {
-                    int id = ezParser.write(itemField.getText(), amountField.getText());
-                    Item item = new Item(id, itemField.getText(), Integer.parseInt(amountField.getText()));
-                    itemField.setText("");
-                    amountField.setText("");
-                    generateItemList();
-                    dbConnector.saveItem(item);
-                } else if (amountField.getText().equals("")) {
-                    int id = ezParser.write(itemField.getText(), amountField.getText());
-                    Item item = new Item(id, itemField.getText());
-                    itemField.setText("");
-                    amountField.setText("");
-                    generateItemList();
-                    dbConnector.saveItem(item);
-                } else {
-                    Alert alert = new Alert(AlertType.WARNING);
-                    alert.setTitle("Wrong input!");
-                    alert.setHeaderText("Invalid amount value!");
-                    alert.setContentText("Please only give numeric values to amount, or leave it empty.");
-                    alert.showAndWait();
-                }
-            }
-        });
-        return controls;
+    private boolean validateAmountField(String amount) { 
+        boolean validatedInput = false;
+        if (amount.matches("\\d+(\\.\\d+)?") || amount.equals(" ")) {
+            validatedInput = true;
+        }
+        return validatedInput;
     }
 
-    private boolean validateAmountField(String amount) { 
-        return amount.matches("\\d+(\\.\\d+)?");
+    private void createNewAlert(String title, String header, String content) {
+        Alert alert = new Alert(AlertType.WARNING);
+        alert.setTitle(title);
+        alert.setHeaderText(header);
+        alert.setContentText(content);
+        alert.showAndWait();
+    }
+
+    private void addItem(String itemField, String amountField) {
+        Item item;
+        int id = ezParser.write(itemField, amountField);
+        if (amountField.equals("")) {
+            item = new Item(id, itemField);
+        } else {
+            item = new Item(id, itemField, Integer.parseInt(amountField));
+        }
+        createItemWrapper(item, id);
+        dbConnector.saveItem(item);
     }
 
     /**
@@ -221,6 +171,8 @@ public class Gui extends Application {
      */
     private void generateItemList() {
         itemBox = new VBox();
+        itemBox.getChildren().add(new Separator());
+        itemBox.getStyleClass().add("itemBox");
         itemBox.setSpacing(5);
         root.setCenter(itemBox);
 
@@ -234,34 +186,40 @@ public class Gui extends Application {
             Integer key = entry.getKey();
             String value = entry.getValue().get(0);
             String itemAmount = "";
-            try {
-                if (!entry.getValue().get(1).equals("null")) {
-                    itemAmount = entry.getValue().get(1)+"x";
-                }
-            } catch (NullPointerException e) {
-                itemAmount = "";
+            if (!entry.getValue().get(1).equals("null")) {
+                itemAmount = entry.getValue().get(1);
             }
 
-            AnchorPane itemWrapper = new AnchorPane();
-            Button removeButton = new Button("X");
-            Label item = new Label(value);
-            item.getStyleClass().add("itemLabel");
-            Label amount = new Label(itemAmount);
-            amount.getStyleClass().add("itemLabel");
-            Separator separator = new Separator();
-            separator.getStyleClass().add("itemSeparator");
-            itemWrapper.getChildren().addAll(item, amount, removeButton);
-            itemBox.getChildren().addAll(itemWrapper, separator);
+            Item item = new Item(key, value, Integer.parseInt(itemAmount));
 
-            AnchorPane.setLeftAnchor(item, 5.0);
-            AnchorPane.setLeftAnchor(amount, 216.0);
-            AnchorPane.setRightAnchor(removeButton, 5.0);
-
-            removeButton.setOnAction((e) -> {
-                ezParser.remove(key);
-                dbConnector.removeItem(key);
-                generateItemList();
-            });
+            createItemWrapper(item, key);
         } 
+    }
+
+    private void createItemWrapper(Item item, Integer key) {
+        Label itemLabel = new Label();
+        if (item.getAmount() != null) {
+            itemLabel.setText("("+item.getAmount()+")"+" "+item.getItem());
+        } else {
+            itemLabel.setText(item.getItem());
+        }
+        AnchorPane itemWrapper = new AnchorPane();
+        Button removeButton = new Button();
+        removeButton.getStyleClass().add("buttonRemove");
+        itemLabel.getStyleClass().add("itemLabel");
+        Separator separator = new Separator();
+        separator.getStyleClass().add("itemSeparator");
+        itemWrapper.getChildren().addAll(itemLabel, removeButton);
+        itemBox.getChildren().addAll(itemWrapper, separator);
+
+        AnchorPane.setTopAnchor(itemLabel, 7.0);
+        AnchorPane.setLeftAnchor(itemLabel, 5.0);
+        AnchorPane.setRightAnchor(removeButton, 7.0);
+
+        removeButton.setOnAction((e) -> {
+            ezParser.remove(key);
+            dbConnector.removeItem(key);
+            generateItemList();
+        });
     }
 }
