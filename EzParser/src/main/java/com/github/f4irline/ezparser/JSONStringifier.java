@@ -1,11 +1,8 @@
-/**
- * Package of the json parser.
- */
-package fi.projects.fairline.ezparser;
+package com.github.f4irline.ezparser;
 
+import com.github.f4irline.ezparser.JSONObject;
 import java.util.List;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.io.FileReader;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -16,33 +13,40 @@ import java.lang.reflect.Field;
  * .json data file.
  * 
  * @author Tommi Lepola
- * @version 1.0
+ * @version 2.0
  * @since 2018.1106
  */
 public class JSONStringifier {
-    private LinkedHashMap<Integer, List<String>> items;
+    private ArrayList<JSONObject> objects;
     private List<String> lines;
     private String indent = "    ";
 
-    private int key = 0;
-    private String value = "";
-    private String amount = "";
-
-
+    /**
+     * Initializes the stringifier by first initializing the 
+     * needed ArrayLists and then initializing the JSON list.
+     * 
+     * <p>
+     * The ArrayList "lines" holds all the lines of the JSON file.
+     * </p>
+     * 
+     * <p>
+     * The ArrayList "objects" holds all the JSONObjects.
+     * </p>
+     */
     public JSONStringifier() {
-        items = new LinkedHashMap<>();
         lines = new ArrayList<>();
+        objects = new ArrayList<>();
         createJSONList();
     }
 
     /**
-     * Reads the whole .json file into an ArrayList and puts all the
-     * already existing items into a LinkedHashMap.
+     * Reads the whole .json file into an ArrayList and adds the objects
+     * to another ArrayList.
      * 
      * <p>
      * The method readFileToArray reads the whole data.json
-     * file into an ArrayList and if items already exist in the .json
-     * file, adds them into a LinkedHashMap.
+     * file into an ArrayList and adds the object keys and values to the
+     * objects ArrayList.
      * </p>
      * 
      * <p>
@@ -55,25 +59,39 @@ public class JSONStringifier {
     private void createJSONList() {
         try (BufferedReader fileReader = new BufferedReader(new FileReader("data.json"))) {
             String line;
+            boolean nextIsObject = false;
+            boolean objectEnd = false;
+            JSONObject jsonObject = new JSONObject();
             while ((line = fileReader.readLine()) != null) {
+                // Replace all unnecessary clutter from the lines first
+                // to help using substrings etc.
                 line = line.replaceAll(indent, "");
                 line = line.replaceAll("},", "}");
                 lines.add(line);
                 line = line.replaceAll(",", "");
                 line = line.replaceAll(" ", "");
-                if (line.contains("\"id\"")) {
-                    line = line.replaceAll("\"", "");
-                    key = Integer.parseInt(line.substring(3, 6));
-                } else if (line.contains("\"item\"")) {
-                    line = line.replaceAll("\"", "");
-                    value = line.substring(5);
-                } else if (line.contains("\"amount\"")) {
-                    line = line.replaceAll("\"", "");
-                    List<String> values = new ArrayList<>();
-                    amount = line.substring(7);
-                    values.add(value);
-                    values.add(amount);
-                    items.put(key, values);
+                line = line.replaceAll("\"", "");
+                
+                // If we know that the current line holds info from the object,
+                // put the key and value from the line to the JSONObject.
+                if (nextIsObject && line.contains(":") && !line.contains("list:[")) {
+                    int indexOfSeparator = line.indexOf(":");
+                    jsonObject.putKeyValue(line.substring(0, indexOfSeparator), line.substring(indexOfSeparator+1));
+                // If we know that we've just added all the key-value pairs from an object,
+                // add the object to the ArrayList which holds all the JSONObjects.
+                } else if (objectEnd) {
+                    objects.add(jsonObject);
+                    objectEnd = false;
+                }
+                // If line contains "{", the next line is going to hold info of the JSONObject.
+                // Therefore we initialize a new JSONObject.
+                if (line.contains("{")) {
+                    nextIsObject = true;
+                    jsonObject = new JSONObject();
+                // If line contains "}", we're not inside a singular JSONObject anymore.
+                } else if (line.contains("}")) {
+                    nextIsObject = false;
+                    objectEnd = true;
                 }
             }
         } catch (IOException e) {
@@ -102,27 +120,31 @@ public class JSONStringifier {
      * ArrayList in to the .json file itself.
      * </p>
      * 
-     * @param key the key of the item which will be deleted from the JSON.
-     * @param jsonWriter the object which holds all the means to write to the .json file.
+     * @param id - the key of the item which will be deleted from the JSON.
+     * @param jsonWriter - the object which holds all the means to write to the .json file.
      */
-    public void removeItemFromJSON(int key, JSONWriter jsonWriter) {
+    public void removeItemFromJSON(int id, JSONWriter jsonWriter) {
         int removeIndex = 0;
         int index = 0;
-        String keyString = Integer.toString(key);
+        String idString = Integer.toString(id);
 
+        // Iterate through all the lines and check
+        // in which index is the object to be removed.
         for (String line : lines) {
             index++;
-            if (line.contains(keyString)) {
+            if (line.contains(idString)) {
                 removeIndex = index;
             }
         }
 
+        // Positions to remove lines from.
         int objectStartIndex = removeIndex - 2;
         int idIndex = removeIndex - 1;
         int itemIndex = removeIndex;
         int amountIndex = removeIndex + 1;
         int objectEndIndex = removeIndex + 2;
 
+        // Remove lines from the defined positions.
         lines.remove(objectEndIndex);
         lines.remove(amountIndex);
         lines.remove(itemIndex);
@@ -134,34 +156,51 @@ public class JSONStringifier {
         jsonWriter.writeToJSON(lines, listBoundaries[0], listBoundaries[1]-2);
     }
 
+    /**
+     * Adds any kind of object to the JSON using Java Reflection API.
+     * 
+     * @param obj - object to be added.
+     * @param jsonWriter - the filewriter which handles writing to the JSON file.
+     */
     public void addObjectToJSON(Object obj, JSONWriter jsonWriter) {
         Class<?> cls = obj.getClass();
 
         int[] listBoundaries = checkListBoundaries();
 
+        // Get all public fields from the object to an array.
         Field[] fields = cls.getDeclaredFields();
 
+        // The object starts from the end of the list (where the line is "]").
         int objectStartIndex = listBoundaries[1] - 1;
+
+        // The object ends at the object start index + the number of public fields + 1.
         int objectEndIndex = objectStartIndex + fields.length + 1;
 
+        // Used to iterate through all the fields of the object.
         int fieldIndex = 0;
 
+        // Add the object start, "{" to the object start index.
         lines.add(objectStartIndex, "{");
 
+        // Iterate the lines starting from where the new object starts from until the end of the new object.
         for(int i = objectStartIndex+1; i < objectEndIndex; i++) {
+            // Get the name of the field that's being currently iterated.
             String fieldName = fields[fieldIndex].getName();
             Field field = null;
             Object value = null;
             try {
+                // Get the field into a Field object and make it accessible.
                 field = cls.getDeclaredField(fieldName);
                 field.setAccessible(true);
             } catch (NoSuchFieldException e) {
                 e.printStackTrace();
             }
 
+            // Now that we have the name of the field object, get the value from the field object as well.
             if (field != null) {
                 try {
                     value = field.get(obj);
+                    // If the value is a string, add quote marks to it for proper JSON formatting.
                     if (value instanceof String) {
                         value = (String) "\"" + value + "\"";
                     }
@@ -170,6 +209,7 @@ public class JSONStringifier {
                 }
             }
             
+            // If were not at the end of the object fields, add a "," to the ending of it for proper JSON formatting.
             if (i != objectEndIndex-1) {
                 lines.add(i, ("\""+fieldName+"\"" + " : " + value + ","));
             } else {
@@ -179,44 +219,11 @@ public class JSONStringifier {
             fieldIndex++;
         }
 
+        // When we're done iterating through the lines and the object to be added, add "}" to end the object.
         lines.add(objectEndIndex, "}");
 
+        // Call JSONWriter to write the content of the "lines" ArrayList to the JSON.
         jsonWriter.writeToJSON(lines, listBoundaries[0], objectEndIndex);
-    }
-
-    /**
-     * Adds an item to the .json file.
-     * 
-     * <p>
-     * First it searches the starting line of the list in the .json and the ending 
-     * line of the list in the .json.
-     * </p>
-     * 
-     * <p>
-     * After that it adds the new item first to the ArrayList which holds all the
-     * data from the .json and then it calls the writeToFile method to write the 
-     * ArrayList into the .json.
-     * </p>
-     * 
-     * @param object the object which is added into the .json list.
-     * @param jsonWriter the object which holds all the means to write to the .json file.
-     */
-    public void addItemToJSON(JSONObject object, JSONWriter jsonWriter) {
-        int[] listBoundaries = checkListBoundaries();
-
-        int objectStartIndex = listBoundaries[1] - 1;
-        int idIndex = listBoundaries[1];
-        int itemIndex = listBoundaries[1] + 1;
-        int amountIndex = listBoundaries[1] + 2;
-        int objectEndIndex = listBoundaries[1] + 3;
-
-        lines.add(objectStartIndex, "{");
-        lines.add(idIndex, object.getJsonKey());
-        lines.add(itemIndex, object.getJsonItem());
-        lines.add(amountIndex, object.getJsonAmount());
-        lines.add(objectEndIndex, "}");
-
-        jsonWriter.writeToJSON(lines, listBoundaries[0], listBoundaries[1]+3);
     }
 
     /**
@@ -252,12 +259,11 @@ public class JSONStringifier {
     }
 
     /**
-     * Returns the items LinkedHashMap.
+     * Returns the JSONObjects in an ArrayList.
      * 
-     * @return items the items LinkedHashMap which holds all the list items, their amounts
-     * and their identifiers.
+     * @return - the JSONObjects in an ArrayList.
      */
-    public LinkedHashMap<Integer, List<String>> getJSONList() {
-        return items;
+    public ArrayList<JSONObject> getJSONObjects() {
+        return objects;
     }
 }

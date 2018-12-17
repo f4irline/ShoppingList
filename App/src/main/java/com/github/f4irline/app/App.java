@@ -1,7 +1,4 @@
-/**
- * Package of the shoppinglist application.
- */
-package fi.projects.fairline.app;
+package com.github.f4irline.app;
 
 import javafx.application.Application;
 
@@ -14,6 +11,7 @@ import javafx.application.Application;
  * 
  * <p>
  * The application uses a JSON parser "EzParser" to write data to and read data from a .json file.
+ * It also uses Hibernate to save data into a MySQL database.
  * </p>
  * 
  * <p>

@@ -4,7 +4,7 @@
 "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd"> 
 
 <hibernate-mapping>
-    <class name="fi.projects.fairline.app.Item" table="ITEMS">
+    <class name="com.github.f4irline.app.components.Item" table="ITEMS">
 
         <meta attribute = "class-description">
             This class contains all shopping list items. 

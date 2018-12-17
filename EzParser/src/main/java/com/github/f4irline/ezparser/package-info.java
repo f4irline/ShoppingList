@@ -3,4 +3,4 @@
  * 
  * @since 2018.1106
  */
-package fi.projects.fairline.ezparser;
+package com.github.f4irline.ezparser;

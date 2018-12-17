@@ -11,6 +11,6 @@
         <property name="connection.password">b6j0OHq5</property>
         <property name="connection.driver_class">com.mysql.cj.jdbc.Driver</property>
         <mapping resource="Item.hbm.xml"/>
-        <mapping class="fi.projects.fairline.app.Item"/>
+        <mapping class="com.github.f4irline.app.components.Item"/>
     </session-factory>
 </hibernate-configuration>

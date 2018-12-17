@@ -3,4 +3,4 @@
  *
  * @since 2018.1106
  */
-package fi.projects.fairline.app;
+package com.github.f4irline.app;

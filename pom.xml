@@ -4,7 +4,7 @@
                              http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>fi.projects.fairline</groupId>
+    <groupId>com.github.f4irline</groupId>
     <artifactId>ShoppingList</artifactId>
     <packaging>pom</packaging>
     <version>1.0</version>
@@ -18,7 +18,7 @@
     <name>Shopping List App</name>
 
     <modules>
-        <module>EzParser</module>
+        <module>ezparser</module>
         <module>App</module>
     </modules>
 

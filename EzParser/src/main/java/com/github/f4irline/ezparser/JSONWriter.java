@@ -1,7 +1,4 @@
-/**
- * Package of the json parser.
- */
-package fi.projects.fairline.ezparser;
+package com.github.f4irline.ezparser;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -11,7 +8,7 @@ import java.util.List;
  * Handles all the writing to the .json data file.
  * 
  * @author Tommi Lepola
- * @version 1.0
+ * @version 2.0
  * @since 2018.1106
  */
 public class JSONWriter {
@@ -34,10 +31,15 @@ public class JSONWriter {
      * <p>
      * initJSON writes a basic structure for the .json file. Currently
      * it only writes a structure so that there is a list which can hold different
-     * items.
+     * objects.
      * </p>
      */
     public void initJSON() {
+        try {
+            fileWriter = new FileWriter("data.json");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         jsonString = new StringBuilder();
         jsonString.append("{");
         jsonString.append("\n");
@@ -69,25 +71,35 @@ public class JSONWriter {
      * in the .json file and where the object separating commas (",") should be put.
      * </p>
      * 
-     * @param lines the ArrayList which is a representation of the .json file.
-     * @param startIndex the line where the list in the .json starts.
-     * @param lastIndex the line where the list in the .json ends.
+     * @param lines - the ArrayList which is a representation of the .json file.
+     * @param startIndex - the line where the list in the .json starts.
+     * @param lastIndex - the line where the list in the .json ends.
      */
     public void writeToJSON(List<String> lines, int startIndex, int lastIndex) {
         int index = 0;
         jsonString = new StringBuilder();
         for (String line : lines) {
+
+            // If the current line contains "}" or "]", we know that we should indent 4 spaces less.
             if (line.contains("}") || line.contains("]")) {
                 if (!line.contains("{") && !line.contains("[")) {
                     indentAmount -= 4;
                 }
             }
+            
+            // Append the indentation to the stringbuilder.
             indent();
+
+            // If we're inside the list which holds the objects BUT we're not iterating through the last
+            // line of the object, add a "," to the end of it.
             if (index > startIndex-1 && index < lines.size()-1 && index != lastIndex && line.contains("}")) {
                 jsonString.append(line+",\n");
+            // Else we're at the end of the object, so we won't add a "," to it for proper JSON formatting.
             } else {
                 jsonString.append(line+"\n");
             }
+
+            // If the current line contains "{" or "[", we know that we should indent 4 spaces more.
             if (line.contains("{") || line.contains("[")) {
                 if (!line.contains("}") && !line.contains("]")) {
                     indentAmount += 4;
