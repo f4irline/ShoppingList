@@ -156,7 +156,7 @@ public class Gui extends Application {
      * 
      * @param menuBar - the application menubar.
      * @param controls - controls for adding items.
-     * @return
+     * @return - The VBox topgroup.
      */
     private VBox createTopGroup(MenuBar menuBar, HBox controls) {
         VBox topGroup = new VBox();

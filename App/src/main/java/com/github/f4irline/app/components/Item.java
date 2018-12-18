@@ -33,6 +33,7 @@ public class Item {
      * @param id - the key identifier of the item.
      * @param item - the item name.
      * @param amount - the amount of the item.
+     * @param checked - the checked state of the item.
      */
     public Item (int id, String item, Integer amount, boolean checked) {
         setId(id);
@@ -46,6 +47,7 @@ public class Item {
      * 
      * @param id - the key identifier of the item.
      * @param item - the item name.
+     * @param checked - the checked state of the item.
      */
     public Item (int id, String item, boolean checked) {
         setId(id);
