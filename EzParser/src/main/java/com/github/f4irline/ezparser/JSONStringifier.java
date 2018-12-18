@@ -100,13 +100,18 @@ public class JSONStringifier {
     }
 
     /**
-     * Removes an item from the JSON.
+     * Removes an object from the JSON.
      * 
      * <p>
      * First it changes the key to be a String and compares it in
      * whole ArrayList which holds the .json file data. If a match is found,
-     * it defines the index of the item to be removed to be that one. Then 
-     * it removes it using the index from the ArrayList.
+     * it uses checkObjectBoundaries(index) method to check where the object 
+     * (which holds that index) starts and ends.
+     * </p>
+     * 
+     * <p>
+     * After getting the boundaries fo the object, it loops through the lines ArrayList
+     * again from the object's end to object's start, removing the lines between.
      * </p>
      * 
      * <p>
@@ -123,37 +128,67 @@ public class JSONStringifier {
      * @param id - the key of the item which will be deleted from the JSON.
      * @param jsonWriter - the object which holds all the means to write to the .json file.
      */
-    public void removeItemFromJSON(int id, JSONWriter jsonWriter) {
-        int removeIndex = 0;
+    public void removeObjectFromJSON(int id, JSONWriter jsonWriter) {
         int index = 0;
         String idString = Integer.toString(id);
+        int[] objectBounds = null;
 
         // Iterate through all the lines and check
         // in which index is the object to be removed.
         for (String line : lines) {
             index++;
             if (line.contains(idString)) {
-                removeIndex = index;
+                // identifier found, ask for the object's boundaries.
+                objectBounds = checkObjectBoundaries(index);
+                break;
             }
         }
 
-        // Positions to remove lines from.
-        int objectStartIndex = removeIndex - 2;
-        int idIndex = removeIndex - 1;
-        int itemIndex = removeIndex;
-        int amountIndex = removeIndex + 1;
-        int objectEndIndex = removeIndex + 2;
+        int objectStartIndex = objectBounds[0];
+        int objectEndIndex = objectBounds[1];
 
-        // Remove lines from the defined positions.
-        lines.remove(objectEndIndex);
-        lines.remove(amountIndex);
-        lines.remove(itemIndex);
-        lines.remove(idIndex);
-        lines.remove(objectStartIndex);
+        System.out.println(objectStartIndex);
+        System.out.println(objectEndIndex);
+
+        // Iterate the lines starting from the end of the object to the start of the object.
+        // Remove all the lines between there.
+        for (int i = objectEndIndex; i >= objectStartIndex; i--) {
+            lines.remove(i);
+        }
 
         int[] listBoundaries = checkListBoundaries();
 
         jsonWriter.writeToJSON(lines, listBoundaries[0], listBoundaries[1]-2);
+    }
+
+    /**
+     * Checks the to-be-removed object's boundaries.
+     * 
+     * @param index - the to-be-removed object's identifier's index in the lines ArrayList.
+     * @return - the boundaries of the object in an array.
+     */
+    private int[] checkObjectBoundaries(int index) {
+        int objectStartIndex = 0;
+        int objectEndIndex = 0;
+        int[] boundArray = new int [2];
+        for (int i = index; i > 0; i--) {
+            if (lines.get(i).equals("{")) {
+                objectStartIndex = i;
+                break;
+            }
+        }
+
+        for (int i = index; i < lines.size(); i++) {
+            if (lines.get(i).equals("}")) {
+                objectEndIndex = i;
+                break;
+            }
+        }
+
+        boundArray[0] = objectStartIndex;
+        boundArray[1] = objectEndIndex;
+
+        return boundArray;
     }
 
     /**

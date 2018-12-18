@@ -187,7 +187,7 @@ public class EzParser {
      * @param key - the key of the object which exists in the .json.
      */
     public void remove(int key) {
-        jsonStringifier.removeItemFromJSON(key, jsonWriter);
+        jsonStringifier.removeObjectFromJSON(key, jsonWriter);
     }
 
     /**
