@@ -103,40 +103,49 @@ public class Items extends VBox {
 
         // Iterate through the ArrayList which holds LinkedHashMaps.
         for (LinkedHashMap<Object, Object> itemMap : itemsList) {
-            Item item;
-            String id = "";
-            String itemString = "";
-            String amount = "";
-            String checkedString = "";
-            Boolean checked = false;
-            // Iterate through every LinkedHashMap in the ArrayList.
-            // Add values to Strings if the keys match needed values.
-            for (Map.Entry<Object, Object> entry : itemMap.entrySet()) {
-                if (entry.getKey().equals("id")) {
-                    id = (String) entry.getValue();
-                } else if (entry.getKey().equals("item")) {
-                    itemString = (String) entry.getValue();
-                } else if (entry.getKey().equals("amount")) {
-                    amount = (String) entry.getValue();
-                } else if (entry.getKey().equals("checked")) {
-                    checkedString = (String) entry.getValue();
-                    if (checkedString.equals("true")) {
-                        checked = true;
-                    }
-                }
-            } 
-            // After iterating through a LinkedHashMap (which is basically an object),
-            // create a new list item with the values that were checked from the LinkedHashMap.
-            if (amount.equals("") || amount.equals("null")) {
-                item = new Item(Integer.parseInt(id), itemString, checked);
-            } else {
-                item = new Item(Integer.parseInt(id), itemString, Integer.parseInt(amount), checked);
-            }
-            // Put the item into the items LinkedHashMap.
-            items.put(Integer.parseInt(id), item);
-            // Create wrapper for the item, which is displayed in the application.
-            createItemWrapper(item, Integer.parseInt(id));
+            iterateThroughMap(itemMap);
         }
+    }
+
+    /**
+     * Iterates through the LinkedHashMap which contains the values of the item.
+     * 
+     * @param itemMap - the LinkedHashMap which contains the values of the item.
+     */
+    private void iterateThroughMap(LinkedHashMap<Object, Object> itemMap) {
+        Item item;
+        String id = "";
+        String itemString = "";
+        String amount = "";
+        String checkedString = "";
+        Boolean checked = false;
+        // Iterate through every LinkedHashMap in the ArrayList.
+        // Add values to Strings if the keys match needed values.
+        for (Map.Entry<Object, Object> entry : itemMap.entrySet()) {
+            if (entry.getKey().equals("id")) {
+                id = (String) entry.getValue();
+            } else if (entry.getKey().equals("item")) {
+                itemString = (String) entry.getValue();
+            } else if (entry.getKey().equals("amount")) {
+                amount = (String) entry.getValue();
+            } else if (entry.getKey().equals("checked")) {
+                checkedString = (String) entry.getValue();
+                if (checkedString.equals("true")) {
+                    checked = true;
+                }
+            }
+        } 
+        // After iterating through a LinkedHashMap (which is basically an object),
+        // create a new list item with the values that were checked from the LinkedHashMap.
+        if (amount.equals("") || amount.equals("null")) {
+            item = new Item(Integer.parseInt(id), itemString, checked);
+        } else {
+            item = new Item(Integer.parseInt(id), itemString, Integer.parseInt(amount), checked);
+        }
+        // Put the item into the items LinkedHashMap.
+        items.put(Integer.parseInt(id), item);
+        // Create wrapper for the item, which is displayed in the application.
+        createItemWrapper(item, Integer.parseInt(id));
     }
 
     /**
@@ -180,21 +189,43 @@ public class Items extends VBox {
         AnchorPane.setRightAnchor(removeButton, 7.0);
 
         itemLabel.setOnMouseClicked((e) -> {
-            item.changeChecked();
-            if (item.getChecked()) {
-                ezParser.changeValue("checked", true, key);
-                itemLabel.setId("itemLabelChecked");
-            } else {
-                ezParser.changeValue("checked", false, key);
-                itemLabel.setId("itemLabel");
-            }
+            changeCheckedState(item, itemLabel, key);
         });
 
         removeButton.setOnAction((e) -> {
-            ezParser.remove(key);
-            items.remove(key);
-            getChildren().removeAll(itemWrapper, separator);
+            removeItem(key, itemWrapper, separator);
         });
+    }
+
+    /**
+     * Handles changing the item's "checked" state.
+     * 
+     * @param item - the item which's state is being changed.
+     * @param itemLabel - the label which is going to be modified in CSS.
+     * @param key - the key of the item which will be changed.
+     */
+    private void changeCheckedState(Item item, Label itemLabel, int key) {
+        item.changeChecked();
+        if (item.getChecked()) {
+            ezParser.changeValue("checked", true, key);
+            itemLabel.setId("itemLabelChecked");
+        } else {
+            ezParser.changeValue("checked", false, key);
+            itemLabel.setId("itemLabel");
+        }
+    }
+
+    /**
+     * Handles removing the item.
+     * 
+     * @param key - the identifier key of the item.
+     * @param itemWrapper - the itemWrapper which will be removed.
+     * @param separator - the separator which will be removed.
+     */
+    private void removeItem(int key, AnchorPane itemWrapper, Separator separator) {
+        ezParser.remove(key);
+        items.remove(key);
+        getChildren().removeAll(itemWrapper, separator);
     }
 
     /**

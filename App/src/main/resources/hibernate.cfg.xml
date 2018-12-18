@@ -8,7 +8,7 @@
         <property name="dialect">org.hibernate.dialect.MySQL5Dialect</property>
         <property name="connection.url">jdbc:mysql://mydb.tamk.fi/dbc4tlepol1?serverTimezone=UTC&amp;useSSL=false</property>
         <property name="connection.username">c4tlepol</property>
-        <property name="connection.password">hunter2</property>
+        <property name="connection.password">rd49hLFm</property>
         <property name="connection.driver_class">com.mysql.cj.jdbc.Driver</property>
         <mapping resource="Item.hbm.xml"/>
         <mapping class="com.github.f4irline.app.components.Item"/>
