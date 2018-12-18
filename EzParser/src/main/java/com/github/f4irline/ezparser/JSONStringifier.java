@@ -265,7 +265,7 @@ public class JSONStringifier {
      * The method first finds the object by searching for it's integer identifier.
      * After finding the object, it searches for the index of the key which's value
      * is going to be changed from the "lines" ArrayList.
-     * <p>
+     * </p>
      * 
      * <p>
      * After finding the index of the key (and the value therefore), it removes the
@@ -341,7 +341,7 @@ public class JSONStringifier {
      * Writes new value of the key-value pair to the JSON.
      * 
      * @param key - the key of the value which will be changed.
-     * @param oldValue - old value, which will be changed.
+     * @param value - the new value, which will be changed.
      * @param keyIndex - the index of the key-value pair, which will be changed.
      * @param jsonWriter - the FileWriter which handles writing to the JSON.
      */
