@@ -173,6 +173,17 @@ public class EzParser {
     }
 
     /**
+     * Changes value of a single JSON line.
+     * 
+     * @param key - the key of the value to be changed.
+     * @param value - the new value.
+     * @param id - identifier of the object which's value is to be changed.
+     */
+    public void changeValue(Object key, Object value, int id) {
+        jsonStringifier.changeObjectValue(key, value, id, jsonWriter);
+    }
+
+    /**
      * Writes any kind of object to the .json.
      * 
      * @param obj - the object that will be written.

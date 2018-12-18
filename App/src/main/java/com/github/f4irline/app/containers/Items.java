@@ -107,6 +107,8 @@ public class Items extends VBox {
             String id = "";
             String itemString = "";
             String amount = "";
+            String checkedString = "";
+            Boolean checked = false;
             // Iterate through every LinkedHashMap in the ArrayList.
             // Add values to Strings if the keys match needed values.
             for (Map.Entry<Object, Object> entry : itemMap.entrySet()) {
@@ -116,14 +118,19 @@ public class Items extends VBox {
                     itemString = (String) entry.getValue();
                 } else if (entry.getKey().equals("amount")) {
                     amount = (String) entry.getValue();
+                } else if (entry.getKey().equals("checked")) {
+                    checkedString = (String) entry.getValue();
+                    if (checkedString.equals("true")) {
+                        checked = true;
+                    }
                 }
             } 
             // After iterating through a LinkedHashMap (which is basically an object),
             // create a new list item with the values that were checked from the LinkedHashMap.
             if (amount.equals("") || amount.equals("null")) {
-                item = new Item(Integer.parseInt(id), itemString);
+                item = new Item(Integer.parseInt(id), itemString, checked);
             } else {
-                item = new Item(Integer.parseInt(id), itemString, Integer.parseInt(amount));
+                item = new Item(Integer.parseInt(id), itemString, Integer.parseInt(amount), checked);
             }
             // Put the item into the items LinkedHashMap.
             items.put(Integer.parseInt(id), item);
@@ -167,6 +174,17 @@ public class Items extends VBox {
         AnchorPane.setTopAnchor(itemLabel, 7.0);
         AnchorPane.setLeftAnchor(itemLabel, 5.0);
         AnchorPane.setRightAnchor(removeButton, 7.0);
+
+        itemLabel.setOnMouseClicked((e) -> {
+            item.changeChecked();
+            if (item.getChecked()) {
+                ezParser.changeValue("checked", true, key);
+                System.out.println("Is checked!");
+            } else {
+                ezParser.changeValue("checked", false, key);
+                System.out.println("Is not checked!");
+            }
+        });
 
         removeButton.setOnAction((e) -> {
             ezParser.remove(key);

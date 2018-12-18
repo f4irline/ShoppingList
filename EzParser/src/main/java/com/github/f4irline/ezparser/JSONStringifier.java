@@ -147,9 +147,6 @@ public class JSONStringifier {
         int objectStartIndex = objectBounds[0];
         int objectEndIndex = objectBounds[1];
 
-        System.out.println(objectStartIndex);
-        System.out.println(objectEndIndex);
-
         // Iterate the lines starting from the end of the object to the start of the object.
         // Remove all the lines between there.
         for (int i = objectEndIndex; i >= objectStartIndex; i--) {
@@ -259,6 +256,113 @@ public class JSONStringifier {
 
         // Call JSONWriter to write the content of the "lines" ArrayList to the JSON.
         jsonWriter.writeToJSON(lines, listBoundaries[0], objectEndIndex);
+    }
+
+    /**
+     * Handles changing the object's value.
+     * 
+     * <p>
+     * The method first finds the object by searching for it's integer identifier.
+     * After finding the object, it searches for the index of the key which's value
+     * is going to be changed from the "lines" ArrayList.
+     * <p>
+     * 
+     * <p>
+     * After finding the index of the key (and the value therefore), it removes the
+     * line altogether and applies the new value to it.
+     * </p>
+     * 
+     * @param key - the key of the value to be changed.
+     * @param value - the new value.
+     * @param id - the integer identifier of the object which's value is to be changed.
+     * @param jsonWriter - FileWriter which handles the writing to the JSON file.
+     * @return - true if succesful (if the key was found from the object), false if the key was not found from the object.
+     */
+    public boolean changeObjectValue(Object key, Object value, int id, JSONWriter jsonWriter) {
+        int index = 0;
+        int objectIdentifierIndex = 0;
+        int keyIndex = -1;
+        String idString = Integer.toString(id);
+
+        // Iterate through all the lines and check
+        // in which index is the object to be removed.
+        for (String line : lines) {
+            index++;
+            if (line.contains(idString)) {
+                // identifier found, ask for the object's boundaries.
+                objectIdentifierIndex = index;
+                break;
+            }
+        }
+
+        // Find the index of the key-value pair in the ArrayList.
+        keyIndex = findObjectKey(key, objectIdentifierIndex);
+
+        // keyIndex is initially -1, so if it hasn't been changed from the findObjectKey() method,
+        // we know that the key was not found and we return false. If it was found, it will be 
+        // of value 0 or more so we can use that to write the new value in.
+        if (keyIndex > -1) {
+            writeNewValue(key, value, keyIndex, jsonWriter);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Finds the index of the key-value pair which is going to be changed.
+     * 
+     * @param key - the key which's value will be changed.
+     * @param objectIdentifierIndex - the identifier index of the object which's value will be changed.
+     * @return - the index of the key-value pair if found, -1 if not found.
+     */
+    private int findObjectKey(Object key, int objectIdentifierIndex) {
+        int[] objectBoundaries = checkObjectBoundaries(objectIdentifierIndex);
+
+        int objectStartIndex = objectBoundaries[0];
+        int objectEndIndex = objectBoundaries[1];
+
+        for (int i = objectIdentifierIndex; i > objectStartIndex; i--) {
+            if (lines.get(i).contains(key.toString())) {
+                return i;
+            }
+        }
+        
+        for (int i = objectIdentifierIndex; i < objectEndIndex; i++) {
+            if (lines.get(i).contains(key.toString())) {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
+    /**
+     * Writes new value of the key-value pair to the JSON.
+     * 
+     * @param key - the key of the value which will be changed.
+     * @param oldValue - old value, which will be changed.
+     * @param keyIndex - the index of the key-value pair, which will be changed.
+     * @param jsonWriter - the FileWriter which handles writing to the JSON.
+     */
+    private void writeNewValue(Object key, Object value, int keyIndex, JSONWriter jsonWriter) {
+        String newValue = "";
+        // If the value is a string variable, add quotations to it for proper JSON formatting.
+        if (value instanceof String) {
+            newValue = "\""+value.toString()+"\"";
+        } else {
+            newValue = value.toString();
+        }
+        // Creating the new line.
+        String line = "\""+key.toString()+"\""+" : "+newValue;
+
+        // Remove the old line and add the new line to replace it.
+        lines.remove(keyIndex);
+        lines.add(keyIndex, line);
+
+        // Check the list's boundaries and rewrite it to JSON.
+        int[] listBoundaries = checkListBoundaries();
+        jsonWriter.writeToJSON(lines, listBoundaries[0], listBoundaries[1]-2);
     }
 
     /**

@@ -119,9 +119,9 @@ public class Controls extends HBox {
         Item item;
         int id = items.checkNextValidID();
         if (amountField.equals("")) {
-            item = new Item(id, itemField);
+            item = new Item(id, itemField, false);
         } else {
-            item = new Item(id, itemField, Integer.parseInt(amountField));
+            item = new Item(id, itemField, Integer.parseInt(amountField), false);
         }
         items.add(id, item);
     }

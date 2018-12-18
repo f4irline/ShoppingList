@@ -16,5 +16,6 @@
 
         <property name="item" column="item" type="string"/>
         <property name="amount" column="amount" type="int"/>
+        <property name="checked" column="checked" type="boolean"/>
     </class>
 </hibernate-mapping>

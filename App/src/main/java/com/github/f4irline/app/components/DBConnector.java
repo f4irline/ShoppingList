@@ -24,7 +24,7 @@ import java.util.ArrayList;
  * </p>
  * 
  * <p>
- * CREATE TABLE ITEMS (id INT(11) NOT NULL PRIMARY KEY, item VARCHAR(255), amount INT(11));
+ * CREATE TABLE ITEMS (id INT(11) NOT NULL PRIMARY KEY, item VARCHAR(255), amount INT(11), checked BOOLEAN);
  * </p>
  * 
  * @author Tommi Lepola
