@@ -48,9 +48,23 @@
 }
 
 #itemLabel {
-    -fx-text-fill: #fff;
+    -fx-text-fill: rgba(255,255,255,1);
     -fx-font-family: 'Open Sans';
     -fx-font-size: 14pt;
+}
+
+#itemLabel .text {
+    -fx-strikethrough: false;
+}
+
+#itemLabelChecked {
+    -fx-text-fill: rgba(255,255,255,0.4);
+    -fx-font-family: 'Open Sans';
+    -fx-font-size: 14pt;
+}
+
+#itemLabelChecked .text {
+    -fx-strikethrough: true;
 }
 
 .scroll-pane {

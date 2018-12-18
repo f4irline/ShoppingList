@@ -167,7 +167,11 @@ public class Items extends VBox {
         itemWrapper.getChildren().addAll(itemLabel, removeButton);
         getChildren().addAll(itemWrapper, separator);
 
-        itemLabel.setId("itemLabel");
+        if (item.getChecked()) {
+            itemLabel.setId("itemLabelChecked");
+        } else {
+            itemLabel.setId("itemLabel");
+        }
         removeButton.setId("buttonRemove");
         separator.setId("itemSeparator");
 
@@ -179,10 +183,10 @@ public class Items extends VBox {
             item.changeChecked();
             if (item.getChecked()) {
                 ezParser.changeValue("checked", true, key);
-                System.out.println("Is checked!");
+                itemLabel.setId("itemLabelChecked");
             } else {
                 ezParser.changeValue("checked", false, key);
-                System.out.println("Is not checked!");
+                itemLabel.setId("itemLabel");
             }
         });
 
