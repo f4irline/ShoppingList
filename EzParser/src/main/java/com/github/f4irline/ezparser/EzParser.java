@@ -112,7 +112,9 @@ public class EzParser {
 
             jsonWriter.initJSON();
 
-            initList();
+            initJSONStringifier();
+
+            objectPairs = new ArrayList<>();
 
             System.out.println("File initialized.");
         } catch (IOException e) {
