@@ -27,4 +27,24 @@ public class Utils {
         alert.setContentText(content);
         alert.showAndWait();
     }
+
+    /**
+     * Generates a random shade of blue. Used for item wrappers.
+     * 
+     * @return - a color style string.
+     */
+    public static int[] generateRandomBlue() {
+        int R = 52;
+        int minG = 60;
+        int maxG = 85;
+        int minB = 80;
+        int maxB = 105;
+
+        int G = (int) (Math.random() * ((maxG - minG) + 1) + minG);
+        int B = (int) (Math.random() * ((maxB - minB) + 1) + minB);
+
+        int[] rgb = {R, G, B};
+
+        return rgb;
+    }
 }
