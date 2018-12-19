@@ -135,6 +135,7 @@ public class DBConnector {
      * Writes the whole table to the JSON file using EzParser.
      * 
      * @param ezParser - JSON parser library.
+     * @return - true if the operation was succesful, false if it was not succesful.
      */
     @SuppressWarnings("unchecked")
     public boolean writeTableToJSON(EzParser ezParser) {
