@@ -108,7 +108,8 @@ public class Controls extends HBox {
      * 
      * <p>
      * Checks first the next valid ID from the items container. Then
-     * it creates a new Item object. If the amount field is empty, it leaves
+     * it creates a new Item object using Utils.generateRandomBlue() to generate
+     * a random blue color to it. If the amount field is empty, it leaves
      * the amount null on the object. Then it adds it to the items container.
      * </p>
      * 
@@ -119,9 +120,9 @@ public class Controls extends HBox {
         Item item;
         int id = items.checkNextValidID();
         if (amountField.equals("")) {
-            item = new Item(id, itemField, false);
+            item = new Item(id, itemField, Utils.generateRandomBlue(), false);
         } else {
-            item = new Item(id, itemField, Integer.parseInt(amountField), false);
+            item = new Item(id, itemField, Utils.generateRandomBlue(), Integer.parseInt(amountField), false);
         }
         items.add(id, item);
     }

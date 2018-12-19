@@ -3,11 +3,13 @@ package com.github.f4irline.app.containers;
 import com.github.f4irline.ezparser.EzParser;
 import com.github.f4irline.app.components.Item;
 
+import javafx.animation.ScaleTransition;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Separator;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
+import javafx.util.Duration;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -114,19 +116,28 @@ public class Items extends VBox {
      */
     private void iterateThroughMap(LinkedHashMap<Object, Object> itemMap) {
         Item item;
-        String id = "";
+        int id = 0;
         String itemString = "";
+        int red = 0;
+        int green = 0;
+        int blue = 0;
         String amount = "";
         String checkedString = "";
         Boolean checked = false;
         // Iterate through every LinkedHashMap in the ArrayList.
-        // Add values to Strings if the keys match needed values.
+        // Add values to variables if the keys match needed values.
         for (Map.Entry<Object, Object> entry : itemMap.entrySet()) {
             if (entry.getKey().equals("id")) {
-                id = (String) entry.getValue();
+                id = Integer.parseInt((String) entry.getValue());
             } else if (entry.getKey().equals("item")) {
                 itemString = (String) entry.getValue();
-            } else if (entry.getKey().equals("amount")) {
+            } else if (entry.getKey().equals("red")) {
+                red = Integer.parseInt((String) entry.getValue());
+            } else if (entry.getKey().equals("green")) {
+                green = Integer.parseInt((String) entry.getValue());
+            }  else if (entry.getKey().equals("blue")) {
+                blue = Integer.parseInt((String) entry.getValue());
+            }  else if (entry.getKey().equals("amount")) {
                 amount = (String) entry.getValue();
             } else if (entry.getKey().equals("checked")) {
                 checkedString = (String) entry.getValue();
@@ -138,14 +149,14 @@ public class Items extends VBox {
         // After iterating through a LinkedHashMap (which is basically an object),
         // create a new list item with the values that were checked from the LinkedHashMap.
         if (amount.equals("") || amount.equals("null")) {
-            item = new Item(Integer.parseInt(id), itemString, checked);
+            item = new Item(id, itemString, new int[]{red, green, blue}, checked);
         } else {
-            item = new Item(Integer.parseInt(id), itemString, Integer.parseInt(amount), checked);
+            item = new Item(id, itemString, new int[]{red, green, blue}, Integer.parseInt(amount), checked);
         }
         // Put the item into the items LinkedHashMap.
-        items.put(Integer.parseInt(id), item);
+        items.put(id, item);
         // Create wrapper for the item, which is displayed in the application.
-        createItemWrapper(item, Integer.parseInt(id));
+        createItemWrapper(item, id);
     }
 
     /**
@@ -174,6 +185,9 @@ public class Items extends VBox {
         Button removeButton = new Button();
         Separator separator = new Separator();
         itemWrapper.getChildren().addAll(itemLabel, removeButton);
+        itemWrapper.setId("itemWrapper");
+        itemWrapper.setTranslateX(6);
+        itemWrapper.setStyle("-fx-background-color:"+item.getRgbString());
         getChildren().addAll(itemWrapper, separator);
 
         if (item.getChecked()) {
@@ -193,7 +207,7 @@ public class Items extends VBox {
         });
 
         removeButton.setOnAction((e) -> {
-            removeItem(key, itemWrapper, separator);
+            scaleOut(key, itemWrapper, separator);
         });
     }
 
@@ -250,4 +264,27 @@ public class Items extends VBox {
         return index;
     }
 
+    /**
+     * Handles the scaling animation when an item is removed. After scaled to 0, it calls
+     * the actual removing function.
+     * 
+     * @param key - the key of the item to be removed.
+     * @param itemWrapper - the item's wrapper which is to be scaled out and removed.
+     * @param separator - the separator which is to be removed.
+     */
+    private void scaleOut(int key, AnchorPane itemWrapper, Separator separator) {
+        ScaleTransition scaleTransition = new ScaleTransition();
+        scaleTransition.setDuration(Duration.millis(150));
+        scaleTransition.setToX(0.0);
+        scaleTransition.setToY(0.0);
+        
+        scaleTransition.setCycleCount(1);
+        scaleTransition.setAutoReverse(false);
+
+        scaleTransition.setNode(itemWrapper);
+        scaleTransition.setOnFinished((e) -> {
+            removeItem(key, itemWrapper, separator);
+        });
+        scaleTransition.play();
+    }
 }

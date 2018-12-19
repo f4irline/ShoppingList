@@ -15,6 +15,9 @@
         </id>
 
         <property name="item" column="item" type="string"/>
+        <property name="red" column="red" type="int"/>
+        <property name="green" column="green" type="int"/>
+        <property name="blue" column="blue" type="int"/>
         <property name="amount" column="amount" type="int"/>
         <property name="checked" column="checked" type="boolean"/>
     </class>

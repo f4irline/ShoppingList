@@ -6,6 +6,8 @@ import org.hibernate.*;
 import org.hibernate.cfg.*;
 import org.hibernate.query.Query;
 
+import javafx.scene.control.Alert.AlertType;
+
 import java.util.List;
 import java.util.ArrayList;
 
@@ -24,7 +26,7 @@ import java.util.ArrayList;
  * </p>
  * 
  * <p>
- * CREATE TABLE ITEMS (id INT(11) NOT NULL PRIMARY KEY, item VARCHAR(255), amount INT(11), checked BOOLEAN);
+ * CREATE TABLE ITEMS (id INT(11) NOT NULL PRIMARY KEY, item VARCHAR(255), amount INT(11), checked BOOLEAN, red INT(3), green INT(3), blue INT(3));
  * </p>
  * 
  * @author Tommi Lepola
@@ -135,22 +137,26 @@ public class DBConnector {
      * @param ezParser - JSON parser library.
      */
     @SuppressWarnings("unchecked")
-    public void writeTableToJSON(EzParser ezParser) {
+    public boolean writeTableToJSON(EzParser ezParser) {
         if (!session.isOpen()) {
             session = factory.openSession();
         }
 
-        ezParser.clearJSON();
-
         List<Item> results = session.createQuery("FROM Item").list();
 
-        for (Item item : results) {
-            ezParser.write(item);
+        if (results.size() > 0) {
+            ezParser.clearJSON();
+            for (Item item : results) {
+                ezParser.write(item);
+            }
+            ezParser.initList();
+            session.close();
+            return true;
+        } else {
+            Utils.createNewAlert("No items found!", "The items database is empty.", "There seems to be no items saved to the database yet. Why don't you create some and save them?", AlertType.WARNING);
+            session.close();
+            return false;
         }
-
-        ezParser.initList();
-
-        session.close();
     }
 
     /**

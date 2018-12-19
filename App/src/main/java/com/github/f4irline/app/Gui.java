@@ -141,8 +141,9 @@ public class Gui extends Application {
         });
 
         appMenu.getLoadButton().setOnAction((e) -> {
-            dbConnector.writeTableToJSON(ezParser);
-            items.generateItemList();
+            if(dbConnector.writeTableToJSON(ezParser)) {
+                items.generateItemList();
+            };
         });
 
         appMenu.getExitButton().setOnAction((e) -> {
