@@ -253,7 +253,7 @@ public class Items extends VBox {
      * @return The index which is available.
      */
     public int checkNextValidID() {
-        int index = 101;
+        int index = 1001;
 
         while (true) {
             if (!items.containsKey(index)) {
