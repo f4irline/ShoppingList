@@ -1,6 +1,6 @@
 [![Maven Central](https://img.shields.io/maven-central/v/com.github.f4irline/ezparser.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22com.github.f4irline%22%20AND%20a:%22ezparser%22)
 
-#EzParser - A Simple JSON Parser Library
+# EzParser - A Simple JSON Parser Library
 
 ## Introduction
 
