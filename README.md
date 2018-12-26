@@ -14,3 +14,5 @@ A simple JSON parsing library, which can be used to save simple Java objects to 
 ### A simple desktop shopping list application made in Java.
 
 A very simple desktop shopping application. Saves list items in a JSON file using the EzParser library and reads them from the JSON file as well. Has functionality to save the items to a MySQL database using Hibernate.
+
+![Preview image](images/appimage.PNG "Image of the application")
